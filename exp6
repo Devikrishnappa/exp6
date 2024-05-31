@@ -1,0 +1,74 @@
+import java.io.IOException;
+import org.apache.poi.xssf.usermodel.*;
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.*;
+
+public class AppTest {
+
+    WebDriver driver;
+    XSSFWorkbook wb;
+    XSSFSheet sheet;
+
+    @BeforeClass
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver",
+                "C:\\Users\\devam\\OneDrive\\Desktop\\exp6n\\expn\\src\\driver\\chromedriver.exe");
+        driver = new ChromeDriver();
+        driver.get("https://www.healthgrades.com/");
+        driver.manage().window().maximize();
+        try {
+            wb = new XSSFWorkbook(
+                    "C:\\Users\\devam\\OneDrive\\Desktop\\exp6n\\expn\\src\\file\\Hospital.xlsx");
+            sheet = wb.getSheetAt(0);
+        } catch (IOException e) {
+            System.out.println("Could not find data file");
+        }
+    }
+
+    @Test(priority = 1)
+    public void testInput() throws Exception {
+        WebElement clr = driver.findElement(By
+                .xpath("//*[@id=\"autosuggest-container--hero\"]/div[1]/search/div/form/div[1]/div[2]/div[1]/button"));
+        clr.click();
+
+        WebElement cond = driver.findElement(By.xpath("//*[@id=\"homepage-search-input\"]"));
+        XSSFRow row = sheet.getRow(1);
+        XSSFCell cell1 = row.getCell(0);
+        cond.sendKeys(cell1.getStringCellValue());
+
+        WebElement loc = driver
+                .findElement(By.xpath("//*[@id=\"homepage-location-input\"]"));
+        XSSFCell cell2 = row.getCell(1);
+        loc.sendKeys(cell2.getStringCellValue());
+
+        Thread.sleep(2000);
+    }
+
+    @Test(priority = 2)
+    public void testSearch() {
+        WebElement srch = driver
+                .findElement(By.xpath("//*[@id=\"autosuggest-container--hero\"]/div[1]/search/div/form/button"));
+        srch.click();
+    }
+
+    @Test(priority = 3)
+    public void testResult() {
+
+        WebElement res = null;
+        try {
+            res = driver.findElement(By.className("results-header"));
+        } catch (Exception e) {
+            Assert.assertNotNull(res, "Search not successful");
+        }
+    }
+
+    @AfterClass
+    public void tearDown() throws Exception {
+        Thread.sleep(2000);
+        driver.quit();
+        wb.close();
+    }
+
+}
